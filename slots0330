@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slots 老虎机小游戏</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top, #2b2f77, #111428 60%, #090b16);
+      color: #fff;
+    }
+
+    .game {
+      width: min(92vw, 760px);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: 34px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #cbd5ff;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .label {
+      font-size: 13px;
+      color: #c7cdfc;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .slot-frame {
+      background: linear-gradient(180deg, #f7d36b, #c78a16);
+      border-radius: 24px;
+      padding: 14px;
+      box-shadow: inset 0 2px 6px rgba(255,255,255,0.4), 0 12px 24px rgba(0,0,0,0.28);
+      margin-bottom: 18px;
+    }
+
+    .slots {
+      background: #111;
+      border-radius: 18px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .reel {
+      height: 130px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff, #dfdfdf);
+      color: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      box-shadow: inset 0 0 0 3px #eee, inset 0 -8px 24px rgba(0,0,0,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reel.spinning {
+      animation: shake 0.18s linear infinite;
+      filter: blur(1px);
+    }
+
+    @keyframes shake {
+      0% { transform: translateY(-2px); }
+      50% { transform: translateY(2px); }
+      100% { transform: translateY(-2px); }
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 10px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .bet-box {
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #e8ecff;
+      color: #1d2450;
+    }
+
+    .btn-spin {
+      background: linear-gradient(180deg, #3df08a, #20b45f);
+      color: #07160d;
+      min-width: 120px;
+    }
+
+    .message {
+      min-height: 52px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      color: #fff6bf;
+      padding: 10px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .paytable {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .paytable h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .paytable ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #dfe4ff;
+      line-height: 1.8;
+    }
+
+    .footer {
+      margin-top: 14px;
+      text-align: center;
+      color: #b5bdf1;
+      font-size: 13px;
+    }
+
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: 1fr 1fr; }
+      .btn-spin { grid-column: 1 / -1; }
+      .reel { height: 100px; font-size: 52px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game">
+    <h1>🎰 Slots 老虎机</h1>
+    <div class="subtitle">3 连相同即中奖，777 超级大奖</div>
+
+    <div class="stats">
+      <div class="card">
+        <div class="label">余额</div>
+        <div class="value" id="balance">1000</div>
+      </div>
+      <div class="card">
+        <div class="label">当前下注</div>
+        <div class="value" id="bet">50</div>
+      </div>
+      <div class="card">
+        <div class="label">最近奖励</div>
+        <div class="value" id="lastWin">0</div>
+      </div>
+    </div>
+
+    <div class="slot-frame">
+      <div class="slots">
+        <div class="reel" id="reel1">🍒</div>
+        <div class="reel" id="reel2">🍋</div>
+        <div class="reel" id="reel3">🔔</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="bet-box">下注金额：<strong id="betText">50</strong></div>
+      <button class="btn-secondary" id="minusBet">- 减少</button>
+      <button class="btn-secondary" id="plusBet">+ 增加</button>
+      <button class="btn-spin" id="spinBtn">开始旋转</button>
+    </div>
+
+    <div class="message" id="message">点击“开始旋转”试试手气！</div>
+
+    <div class="paytable">
+      <h3>赔率说明</h3>
+      <ul>
+        <li>🍒🍒🍒：下注 x 3</li>
+        <li>🍋🍋🍋：下注 x 4</li>
+        <li>🔔🔔🔔：下注 x 6</li>
+        <li>💎💎💎：下注 x 10</li>
+        <li>7️⃣7️⃣7️⃣：下注 x 20</li>
+        <li>任意两个 7️⃣：下注 x 2</li>
+      </ul>
+    </div>
+
+    <div class="footer">单文件 HTML / CSS / JavaScript，可直接保存为 slots.html 运行</div>
+  </div>
+
+  <script>
+    const symbols = ["🍒", "🍋", "🔔", "💎", "7️⃣"];
+    const payouts = {
+      "🍒": 3,
+      "🍋": 4,
+      "🔔": 6,
+      "💎": 10,
+      "7️⃣": 20,
+    };
+
+    let balance = 1000;
+    let bet = 50;
+    let spinning = false;
+
+    const balanceEl = document.getElementById("balance");
+    const betEl = document.getElementById("bet");
+    const betTextEl = document.getElementById("betText");
+    const lastWinEl = document.getElementById("lastWin");
+    const messageEl = document.getElementById("message");
+    const spinBtn = document.getElementById("spinBtn");
+    const minusBet = document.getElementById("minusBet");
+    const plusBet = document.getElementById("plusBet");
+    const reels = [
+      document.getElementById("reel1"),
+      document.getElementById("reel2"),
+      document.getElementById("reel3"),
+    ];
+
+    function updateUI() {
+      balanceEl.textContent = balance;
+      betEl.textContent = bet;
+      betTextEl.textContent = bet;
+      minusBet.disabled = spinning || bet <= 10;
+      plusBet.disabled = spinning || bet >= 200;
+      spinBtn.disabled = spinning || balance < bet;
+    }
+
+    function randomSymbol() {
+      return symbols[Math.floor(Math.random() * symbols.length)];
+    }
+
+    function setMessage(text) {
+      messageEl.textContent = text;
+    }
+
+    function evaluate(result) {
+      const [a, b, c] = result;
+
+      if (a === b && b === c) {
+        const multi = payouts[a] || 0;
+        return {
+          win: bet * multi,
+          text: `恭喜！${a}${b}${c}，赢得 ${bet * multi} 金币！`,
+        };
+      }
+
+      const count777 = result.filter(s => s === "7️⃣").length;
+      if (count777 === 2) {
+        return {
+          win: bet * 2,
+          text: `中了两个 7️⃣！赢得 ${bet * 2} 金币！`,
+        };
+      }
+
+      return {
+        win: 0,
+        text: `这次没中，再来一把！`,
+      };
+    }
+
+    function animateSpin(finalSymbols) {
+      spinning = true;
+      updateUI();
+      setMessage("旋转中...");
+      lastWinEl.textContent = 0;
+
+      reels.forEach(reel => reel.classList.add("spinning"));
+
+      const timers = [];
+      reels.forEach((reel, index) => {
+        const timer = setInterval(() => {
+          reel.textContent = randomSymbol();
+        }, 80);
+        timers.push(timer);
+
+        setTimeout(() => {
+          clearInterval(timer);
+          reel.textContent = finalSymbols[index];
+          reel.classList.remove("spinning");
+
+          if (index === reels.length - 1) {
+            const result = evaluate(finalSymbols);
+            balance += result.win;
+            lastWinEl.textContent = result.win;
+            setMessage(result.text);
+            spinning = false;
+            updateUI();
+
+            if (balance < bet) {
+              setMessage(result.text + " 余额不足，请降低下注。");
+            }
+          }
+        }, 900 + index * 500);
+      });
+    }
+
+    spinBtn.addEventListener("click", () => {
+      if (spinning) return;
+      if (balance < bet) {
+        setMessage("余额不足，无法继续下注。请先降低下注金额。\n");
+        return;
+      }
+
+      balance -= bet;
+      updateUI();
+
+      const finalSymbols = [randomSymbol(), randomSymbol(), randomSymbol()];
+      animateSpin(finalSymbols);
+    });
+
+    minusBet.addEventListener("click", () => {
+      if (spinning) return;
+      bet = Math.max(10, bet - 10);
+      updateUI();
+    });
+
+    plusBet.addEventListener("click", () => {
+      if (spinning) return;
+      bet = Math.min(200, bet + 10);
+      updateUI();
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>
